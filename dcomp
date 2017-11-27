@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+
+/*
+ *	dcomp: executable script for instant.js date library and compare function
+ */
+
+const Instant = require('./instant.js');
+const fs = require('fs');
+const readline = require('readline');
+
+(function(){
+
+	let compareDates = function(a, b){
+		try{
+			let dateA = new Instant(a);
+			let dateB = new Instant(b);
+
+			// the 'partial days' and 'positive integer' requirements:
+			// treated as business logic and separated from the date library
+			
+			let fullDaysElapsed = Math.abs(dateA.compare(dateB)) - 1;
+			fullDaysElapsed = (fullDaysElapsed < 0 ? 0 : fullDaysElapsed);
+
+			process.stdout.write(`${a} - ${b}: ${fullDaysElapsed} days\n`);
+		}catch(err){
+			process.stdout.write('Invalid date parameter\n');
+			process.exit(1);	
+		}
+	};
+
+	if(process.argv.length == 2){
+		//read from stdin
+
+		let reader = readline.createInterface({
+		    input: process.stdin
+		});
+
+		reader.on('line', (line) => {
+			let dates = line.split(' ');
+		    compareDates(dates[0], dates[1]);
+		});
+		reader.on('close', () => {
+			process.exit(0);
+		});
+		process.on('SIGINT', () => {
+			process.stdout.write('SIGINT\n');
+			process.exit(0);
+		});
+	}
+
+	if(process.argv.length == 3){
+		//filename as input
+		try{
+			fs.stat(process.argv[2], (err, stats) => { 
+				if(stats.isFile()){
+					let reader = readline.createInterface({
+					    input: fs.createReadStream(process.argv[2])
+					});
+					reader.on('line', (line) => {
+						let dates = line.split(' ');
+					    compareDates(dates[0], dates[1]);
+					});
+					reader.on('close', () => {
+						process.exit(0);
+					});
+				}else{
+					throw err;
+				}
+			});
+
+		}catch(err){
+			process.stdout.write(`cannot find file: ${process.argv[2]}\n`);
+			process.exit(1);
+		}
+		
+	}
+
+	if(process.argv.length == 4){
+		//2 dates as input
+		compareDates(process.argv[2], process.argv[3]);
+		process.exit(0);
+	}
+
+	
+
+})()

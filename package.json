@@ -1,0 +1,14 @@
+{
+  "name": "date_compare",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "moment": "^2.19.2"
+  }
+}
